@@ -41,3 +41,31 @@ mdi completion
 # Example:
 # source <(mdi completion zsh)
 ```
+
+## Screenshots
+
+Markdown folder:
+
+![20231124165206](https://images.poneding.com/2023/11/20231124165206.png)
+
+**Generate markdown index**：
+
+```bash
+mdi -f README.md -t "My Notes"
+```
+
+![20231124170746](https://images.poneding.com/2023/11/20231124170746.png)
+
+As the same time, the index file will be generated in the subdirectory recursively.
+
+**Generate nav in markdown file**:
+
+```bash
+mdi -f README.md -t "My Notes" --nav
+```
+
+![20231124170902](https://images.poneding.com/2023/11/20231124170902.png)
+
+**Customize sub index title**:
+
+You can customize the sub index title by modifying the first-level title of the sub markdown index file generated in the subdirectory.

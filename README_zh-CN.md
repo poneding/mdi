@@ -41,3 +41,31 @@ mdi completion
 # 示例:
 # source <(mdi completion zsh)
 ```
+
+## 截图
+
+Markdown 文件结构：
+
+![20231124165206](https://images.poneding.com/2023/11/20231124165206.png)
+
+**生成 Markdown 索引**：
+
+```bash
+mdi -f README.md -t "我的笔记"
+```
+
+![20231124165311](https://images.poneding.com/2023/11/20231124165311.png)
+
+同时，也会递归的在子目录下生成 Markdown 索引。
+
+**Markdown 文件生成导航**：
+
+```bash
+mdi -f README.md -t "我的笔记" --nav
+```
+
+![20231124165648](https://images.poneding.com/2023/11/20231124165648.png)
+
+**自定义子索引标题**：
+
+可以通过修改子目录中生成的 Markdown 索引文件的一级标题来自定义子索引标题。
