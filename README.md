@@ -2,7 +2,7 @@
 
 English | [中文](README_zh-CN.md)
 
-mdi is a command line tool used to recursively generate markdown indexes in directories.
+mdi(Markdown indexer) is a command line tool used to recursively generate markdown indexes in directories.
 
 ## Installation
 
