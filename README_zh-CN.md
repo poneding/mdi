@@ -54,7 +54,7 @@ Markdown 文件结构：
 mdi -f README.md -t "我的笔记"
 ```
 
-![20231124165311](https://images.poneding.com/2023/11/20231124165311.png)
+![20231124172105](https://images.poneding.com/2023/11/20231124172105.png)
 
 同时，也会递归的在子目录下生成 Markdown 索引。
 
