@@ -2,7 +2,7 @@
 
 [English](README.md) ｜ 中文
 
-mdi 是一个命令行工具，用于在目录下递归地生成 Markdown 索引。
+mdi(Markdown indexer) 是一个命令行工具，用于在目录下递归地生成 Markdown 索引。
 
 ## 安装
 
