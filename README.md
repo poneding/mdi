@@ -23,7 +23,7 @@ mdi
 - `-f` or `--index-file`: Specify the markdown index file, default is `index.md`.
 - `--exclude`: Exclude directories or files, separated by commas.
 - `--override`: Override markdown existing index file, default is `false`.
-- `-r` or `--recursive`: Recursively generate markdown index in subdirectories, default is `true`.
+- `-r` or `--recursive`: Recursively generate markdown index in subdirectories, default is `false`.
 - `--nav`: Generate navigation in markdown file, default is `false`.
 - `-v` or `--verbose`: Show verbose log, default is `false`.
 
