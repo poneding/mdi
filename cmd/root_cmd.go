@@ -46,7 +46,7 @@ func init() {
 	rootCmd.Flags().StringVarP(&indexOpt.IndexFile, "index-file", "f", "./index.md", "Specify the markdown index file, default is `index.md`.")
 	rootCmd.Flags().StringSliceVar(&indexOpt.Exclude, "exclude", []string{}, "Exclude directories or files, separated by commas.")
 	rootCmd.Flags().BoolVar(&genOpt.Override, "override", false, "Override markdown existing index file, default is `false`.")
-	rootCmd.Flags().BoolVarP(&genOpt.Recursive, "recursive", "r", true, "Recursively generate markdown index in subdirectories, default is `true`.")
+	rootCmd.Flags().BoolVarP(&genOpt.Recursive, "recursive", "r", false, "Recursively generate markdown index in subdirectories, default is `false`.")
 	rootCmd.Flags().BoolVar(&genOpt.Nav, "nav", false, "Generate navigation in markdown file, default is `false`.")
 	rootCmd.Flags().BoolVarP(&genOpt.Verbose, "verbose", "v", false, "Show verbose log, default is `false`.")
 }
