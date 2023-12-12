@@ -382,35 +382,7 @@ func hasMdFile(dir string) bool {
 	return dirHasMdFileMap[dir]
 }
 
-// func includeFile(paths []string, file string) bool {
-// 	for _, p := range paths {
-// 		s, err := filepath.Rel(p, file)
-// 		if err == nil && !strings.HasPrefix(s, "..") {
-// 			return true
-// 		}
-// 	}
-
-// 	return false
-// }
-
 func includeFile(paths []string, file string) bool {
-	// for _, p := range paths {
-	// 	s, err := filepath.Rel(p, file)
-	// 	if err == nil && !strings.HasPrefix(s, "..") {
-	// 		return true
-	// 	}
-	// }
-
-	for _, p := range paths {
-		if ok, err := path.Match(p, file); ok && err == nil {
-			return true
-		}
-	}
-
-	return false
-}
-
-func includeFileV2(paths []string, file string) bool {
 	patterns := []gitignore.Pattern{}
 
 	for _, p := range paths {
@@ -418,12 +390,6 @@ func includeFileV2(paths []string, file string) bool {
 	}
 	m := gitignore.NewMatcher(patterns)
 	return m.Match(strings.Split(file, "/"), true)
-
-	// for _, p := range paths {
-	// 	return m.Match([]string{p}, false)
-	// }
-
-	// return false
 }
 
 var fileTitleMap = make(map[string]string)

@@ -19,43 +19,22 @@ package mdi
 import "testing"
 
 func TestIncludeFile(t *testing.T) {
-	paths := []string{"**/test", "test-01.md", "hello/*"}
+	paths := []string{"**/target", "**/hello", "test-01.md"}
 	testdata := []struct {
 		file     string
 		expected bool
 	}{
+		{"rust-lang-book/rlb01_hello-cargo/target/index.md", true},
 		{"hello/index.md", true},
-		{"hello1/index.md", false},
-		{"dir1/test/index.md", true},
-		{"dir1/sub1/test/index.md", true},
-		{"dir2/test/index.md", true},
+		{"dir1/hello/index.md", true},
+		{"dir1/sub1/hello/index.md", true},
+		{"dir1/hello2/index.md", false},
 		{"test-01.md", true},
 		{"test-02.md", false},
 	}
 
 	for _, d := range testdata {
-		actual := includeFileV2(paths, d.file)
-		if actual != d.expected {
-			t.Errorf("includeFile(%q, %q) = %v, expected %v", d.file, paths, actual, d.expected)
-		}
-	}
-	t.Log("TestIncludeFile passed")
-}
-
-func TestIncludeFileV2(t *testing.T) {
-	paths := []string{""}
-	testdata := []struct {
-		file     string
-		expected bool
-	}{
-		{"hello/index.md", true},
-		{"hello/test/index.md", true},
-		{"test-01.md", true},
-		{"test-02.md", true},
-	}
-
-	for _, d := range testdata {
-		actual := includeFileV2(paths, d.file)
+		actual := includeFile(paths, d.file)
 		if actual != d.expected {
 			t.Errorf("includeFile(%q, %q) = %v, expected %v", d.file, paths, actual, d.expected)
 		}
