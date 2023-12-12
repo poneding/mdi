@@ -44,7 +44,7 @@ func init() {
 	rootCmd.Flags().StringVarP(&indexOpt.WorkDir, "workdir", "d", ".", "Specify the directory to generate markdown index.")
 	rootCmd.Flags().StringVarP(&indexOpt.IndexTitle, "index-title", "t", "", "Specify the title of markdown index, default is title of markdown index file or current directory name.")
 	rootCmd.Flags().StringVarP(&indexOpt.IndexFile, "index-file", "f", "./index.md", "Specify the markdown index file, default is `index.md`.")
-	rootCmd.Flags().StringSliceVar(&indexOpt.Exclude, "exclude", []string{}, "Exclude directories or files, separated by commas.")
+	rootCmd.Flags().BoolVar(&indexOpt.InheritGitIgnore, "inherit-gitignore", true, "Use `.gitignore` file as ignore file, default is `true`.")
 	rootCmd.Flags().BoolVar(&genOpt.Override, "override", false, "Override markdown existing index file, default is `false`.")
 	rootCmd.Flags().BoolVarP(&genOpt.Recursive, "recursive", "r", true, "Recursively generate markdown index in subdirectories, default is `true`.")
 	rootCmd.Flags().BoolVar(&genOpt.Nav, "nav", false, "Generate navigation in markdown file, default is `false`.")

@@ -24,6 +24,8 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+
+	"github.com/go-git/go-git/v5/plumbing/format/gitignore"
 )
 
 const (
@@ -34,14 +36,6 @@ const (
 
 var defaultIndexFile = "index.md"
 var mdExts = []string{".md"}
-
-type IndexOption struct {
-	WorkDir    string
-	IndexTitle string
-	IndexFile  string
-	Exclude    []string
-	chains     []*index
-}
 
 var defaultIndexOption = &IndexOption{
 	WorkDir:    ".",
@@ -65,6 +59,16 @@ type index struct {
 	entries  []*entry
 }
 
+type IndexOption struct {
+	WorkDir          string
+	IndexTitle       string
+	IndexFile        string
+	InheritGitIgnore bool
+	chains           []*index
+	rootExcludes     *[]string
+	subExcludes      []string
+}
+
 type GenerationOption struct {
 	Override  bool
 	Recursive bool
@@ -79,8 +83,32 @@ type entry struct {
 	next  *entry
 }
 
+func (idxOpt *IndexOption) AllExclude(excludes []string) []string {
+	if idxOpt.rootExcludes == nil {
+		idxOpt.rootExcludes = &[]string{}
+		// .mdiignore
+		*idxOpt.rootExcludes = append(*idxOpt.rootExcludes, getIgnoreEntry(path.Join(idxOpt.WorkDir, ".mdiignore"))...)
+
+		// .gitignore
+		if idxOpt.InheritGitIgnore {
+			*idxOpt.rootExcludes = append(*idxOpt.rootExcludes, getIgnoreEntry(path.Join(idxOpt.WorkDir, ".gitignore"))...)
+		}
+	}
+
+	return append(excludes, *idxOpt.rootExcludes...)
+}
+
+func getSubExcludes(subDir string) []string {
+	var result []string
+	// sub .mdiignore
+	result = append(result, getIgnoreEntry(path.Join(subDir, ".mdiignore"))...)
+	// sub .gitignore
+	result = append(result, getIgnoreEntry(path.Join(subDir, ".gitignore"))...)
+	return result
+}
+
 func NewIndex(idxOpt *IndexOption) *index {
-	if includeFile(idxOpt.Exclude, idxOpt.WorkDir) {
+	if includeFile(idxOpt.AllExclude(idxOpt.subExcludes), idxOpt.WorkDir) {
 		return nil
 	}
 
@@ -119,18 +147,19 @@ func NewIndex(idxOpt *IndexOption) *index {
 
 	for _, f := range files {
 		subFile := path.Join(idxOpt.WorkDir, f.Name())
-		if includeFile(idxOpt.Exclude, subFile) {
+		if includeFile(idxOpt.AllExclude(idxOpt.subExcludes), subFile) {
 			continue
 		}
 
 		if f.IsDir() {
 			if hasMdFile(subFile) {
 				subIndexOpt := &IndexOption{
-					WorkDir:    subFile,
-					IndexTitle: readTitle(path.Join(subFile, defaultIndexFile)),
-					IndexFile:  path.Join(subFile, defaultIndexFile),
-					Exclude:    idxOpt.Exclude,
-					chains:     append(idxOpt.chains, idx), // append chains in sub index option
+					WorkDir:      subFile,
+					IndexTitle:   readTitle(path.Join(subFile, defaultIndexFile)),
+					IndexFile:    path.Join(subFile, defaultIndexFile),
+					rootExcludes: idxOpt.rootExcludes,
+					subExcludes:  getSubExcludes(subFile),
+					chains:       append(idxOpt.chains, idx), // append chains in sub index option
 				}
 				subIdx := NewIndex(subIndexOpt)
 				if subIdx != nil {
@@ -205,7 +234,6 @@ func (idx *index) Generate(genOpt *GenerationOption) {
 	if genOpt.Nav {
 		idx.decorateEntry()
 	}
-
 }
 
 func (idx *index) getIndexNav() string {
@@ -354,14 +382,48 @@ func hasMdFile(dir string) bool {
 	return dirHasMdFileMap[dir]
 }
 
+// func includeFile(paths []string, file string) bool {
+// 	for _, p := range paths {
+// 		s, err := filepath.Rel(p, file)
+// 		if err == nil && !strings.HasPrefix(s, "..") {
+// 			return true
+// 		}
+// 	}
+
+// 	return false
+// }
+
 func includeFile(paths []string, file string) bool {
+	// for _, p := range paths {
+	// 	s, err := filepath.Rel(p, file)
+	// 	if err == nil && !strings.HasPrefix(s, "..") {
+	// 		return true
+	// 	}
+	// }
+
 	for _, p := range paths {
-		s, err := filepath.Rel(p, file)
-		if err == nil && !strings.HasPrefix(s, "..") {
+		if ok, err := path.Match(p, file); ok && err == nil {
 			return true
 		}
 	}
+
 	return false
+}
+
+func includeFileV2(paths []string, file string) bool {
+	patterns := []gitignore.Pattern{}
+
+	for _, p := range paths {
+		patterns = append(patterns, gitignore.ParsePattern(p, nil))
+	}
+	m := gitignore.NewMatcher(patterns)
+	return m.Match(strings.Split(file, "/"), true)
+
+	// for _, p := range paths {
+	// 	return m.Match([]string{p}, false)
+	// }
+
+	// return false
 }
 
 var fileTitleMap = make(map[string]string)
@@ -398,4 +460,23 @@ func readTitle(file string) string {
 	}
 	fileTitleMap[file] = path.Base(file)
 	return fileTitleMap[file]
+}
+
+func getIgnoreEntry(ignoreFile string) []string {
+	var result []string
+	mdiignore, err := os.Stat(ignoreFile)
+	if err == nil && !mdiignore.IsDir() {
+		f, err := os.Open(ignoreFile)
+		if err == nil {
+			defer f.Close()
+			s := bufio.NewScanner(f)
+			for s.Scan() {
+				line := strings.TrimSpace(s.Text())
+				if line != "" && !strings.HasPrefix(line, "#") {
+					result = append(result, s.Text())
+				}
+			}
+		}
+	}
+	return result
 }
