@@ -19,7 +19,7 @@ package mdi
 import "testing"
 
 func TestIncludeFile(t *testing.T) {
-	paths := []string{"**/target", "**/hello", "test-01.md"}
+	paths := []string{"**/target", "**/hello", "test-01.md", "go/**"}
 	testdata := []struct {
 		file     string
 		expected bool
@@ -29,12 +29,15 @@ func TestIncludeFile(t *testing.T) {
 		{"dir1/hello/index.md", true},
 		{"dir1/sub1/hello/index.md", true},
 		{"dir1/hello2/index.md", false},
+		{"go/index.md", true},
+		{"go/sub/index.md", true},
+		{"go", true},
 		{"test-01.md", true},
 		{"test-02.md", false},
 	}
 
 	for _, d := range testdata {
-		actual := includeFile(paths, d.file)
+		actual := matchFile(paths, d.file)
 		if actual != d.expected {
 			t.Errorf("includeFile(%q, %q) = %v, expected %v", d.file, paths, actual, d.expected)
 		}

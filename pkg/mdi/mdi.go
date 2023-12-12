@@ -83,7 +83,7 @@ type entry struct {
 	next  *entry
 }
 
-func (idxOpt *IndexOption) AllExclude(excludes []string) []string {
+func (idxOpt *IndexOption) RootExcludes() []string {
 	if idxOpt.rootExcludes == nil {
 		idxOpt.rootExcludes = &[]string{}
 		// .mdiignore
@@ -95,7 +95,9 @@ func (idxOpt *IndexOption) AllExclude(excludes []string) []string {
 		}
 	}
 
-	return append(excludes, *idxOpt.rootExcludes...)
+	// fmt.Printf("(*idxOpt.rootExcludes): %v\n", (*idxOpt.rootExcludes))
+
+	return *idxOpt.rootExcludes
 }
 
 func getSubExcludes(subDir string) []string {
@@ -108,10 +110,6 @@ func getSubExcludes(subDir string) []string {
 }
 
 func NewIndex(idxOpt *IndexOption) *index {
-	if includeFile(idxOpt.AllExclude(idxOpt.subExcludes), idxOpt.WorkDir) {
-		return nil
-	}
-
 	files, err := os.ReadDir(idxOpt.WorkDir)
 	if err != nil {
 		panic(err)
@@ -147,7 +145,7 @@ func NewIndex(idxOpt *IndexOption) *index {
 
 	for _, f := range files {
 		subFile := path.Join(idxOpt.WorkDir, f.Name())
-		if includeFile(idxOpt.AllExclude(idxOpt.subExcludes), subFile) {
+		if matchFile(idxOpt.RootExcludes(), subFile) {
 			continue
 		}
 
@@ -363,8 +361,13 @@ func hasMdFile(dir string) bool {
 		return v
 	}
 
+	subExcludes := getSubExcludes(dir)
+
 	dirEntries, _ := os.ReadDir(dir)
 	for _, de := range dirEntries {
+		if matchFile(subExcludes, de.Name()) {
+			continue
+		}
 		if !de.IsDir() {
 			if slices.Contains(mdExts, path.Ext(de.Name())) && de.Name() != defaultIndexFile {
 				dirHasMdFileMap[path.Join(dir, de.Name())] = true
@@ -382,7 +385,7 @@ func hasMdFile(dir string) bool {
 	return dirHasMdFileMap[dir]
 }
 
-func includeFile(paths []string, file string) bool {
+func matchFile(paths []string, file string) bool {
 	patterns := []gitignore.Pattern{}
 
 	for _, p := range paths {
