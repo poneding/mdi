@@ -15,12 +15,12 @@ go install github.com/poneding/mdi@latest
 Generate markdown index:
 
 ```bash
-mdi
+mdi gen
 ```
 
 - `-d` or `--workdir`: Specify the directory to generate markdown index.
 - `-t` or `--index-title`: Specify the title of markdown index, default is title of markdown index file or current directory name.
-- `-f` or `--index-file`: Specify the markdown index file, default is `index.md`.
+- `-f` or `--index-file`: Specify the markdown index file, default is `zz_gneratered_mdi.md`.
 - `--inherit-gitignore`: Use `.gitignore` file as ignore file, default is `true`.
 - `--override`: Override markdown existing index file, default is `false`.
 - `-r` or `--recursive`: Recursively generate markdown index in subdirectories, default is `false`.
@@ -53,7 +53,7 @@ Markdown folder:
 **Generate markdown index**：
 
 ```bash
-mdi -f README.md -t "My Notes"
+mdi gen -f README.md -t "My Notes"
 ```
 
 ![20231124170746](https://images.poneding.com/2023/11/20231124170746.png)
@@ -63,7 +63,7 @@ As the same time, the index file will be generated in the subdirectory recursive
 **Generate nav in markdown file**:
 
 ```bash
-mdi -f README.md -t "My Notes" --nav
+mdi gen -f README.md -t "My Notes" --nav
 ```
 
 ![20231124170902](https://images.poneding.com/2023/11/20231124170902.png)

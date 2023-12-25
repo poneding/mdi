@@ -17,22 +17,22 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-
+	"github.com/poneding/mdi/pkg/mdi"
 	"github.com/spf13/cobra"
 )
 
-var version = "v1.1.0"
-
-var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "Version",
-	Long:  `Version`,
+var cleanCmd = &cobra.Command{
+	Use:   "clean",
+	Short: "Clean",
+	Long:  `Clean`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("version: %s\n", version)
+		mdi.Clean(indexOpt.WorkDir, indexOpt.IndexFile)
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(versionCmd)
+	cleanCmd.Flags().StringVarP(&indexOpt.WorkDir, "workdir", "d", ".", "Specify the directory to clean markdown index.")
+	cleanCmd.Flags().StringVarP(&indexOpt.IndexFile, "index-file", "f", "./zz_gneratered_mdi.md", "Specify the markdown index file, default is `zz_gneratered_mdi.md`.")
+
+	rootCmd.AddCommand(cleanCmd)
 }

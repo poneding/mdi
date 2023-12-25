@@ -15,11 +15,11 @@ go install github.com/poneding/mdi@latest
 生成 Markdown 索引：
 
 ```bash
-mdi
+mdi gen
 ```
 
 - `-d` 或 `--workdir`：指定要生成 Markdown 索引的目录
-- `-f` 或 `--index-file`：指定输出 Markdown 索引文件，默认为 `index.md`
+- `-f` 或 `--index-file`：指定输出 Markdown 索引文件，默认为 `zz_gneratered_mdi.md`
 - `-t` 或 `--index-title`：指定 Markdown 索引标题，默认为 Markdown 索引文件的一级标题或当前目录名
 - `--inherit-gitignore`：使用 `.gitignore` 文件作为排除文件，默认为 `true`
 - `--override`：覆盖现有的 Markdown 索引文件，默认为 `false`
@@ -53,7 +53,7 @@ Markdown 文件结构：
 **生成 Markdown 索引**：
 
 ```bash
-mdi -f README.md -t "我的笔记"
+mdi gen -f README.md -t "我的笔记"
 ```
 
 ![20231124172105](https://images.poneding.com/2023/11/20231124172105.png)
@@ -63,7 +63,7 @@ mdi -f README.md -t "我的笔记"
 **Markdown 文件生成导航**：
 
 ```bash
-mdi -f README.md -t "我的笔记" --nav
+mdi gen -f README.md -t "我的笔记" --nav
 ```
 
 ![20231124165648](https://images.poneding.com/2023/11/20231124165648.png)
