@@ -286,13 +286,13 @@ func (idx *index) decorateEntry() {
 func (e *entry) getBottomNav() string {
 	var result string
 	if e.prev != nil {
-		result += fmt.Sprintf("[» %s](%s)\n", e.prev.title, getLink(path.Base(e.prev.file)))
+		result += fmt.Sprintf("[« %s](%s)\n", e.prev.title, getLink(path.Base(e.prev.file)))
 	}
 	if e.next != nil {
 		if result != "" {
 			result += "\n"
 		}
-		result += fmt.Sprintf("[« %s](%s)\n", e.next.title, getLink(path.Base(e.next.file)))
+		result += fmt.Sprintf("[» %s](%s)\n", e.next.title, getLink(path.Base(e.next.file)))
 	}
 	if result != "" {
 		result = "---\n" + result
