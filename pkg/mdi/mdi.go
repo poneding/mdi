@@ -28,7 +28,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/format/gitignore"
 )
 
-var defaultIndexFile = "zz_gneratered_mdi.md"
+var defaultIndexFile = "zz_generated_mdi.md"
 var mdExts = []string{".md"}
 
 var defaultIndexOption = &IndexOption{
