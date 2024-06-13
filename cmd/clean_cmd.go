@@ -26,13 +26,18 @@ var cleanCmd = &cobra.Command{
 	Short: "Clean",
 	Long:  `Clean`,
 	Run: func(cmd *cobra.Command, args []string) {
-		mdi.Clean(indexOpt.WorkDir, indexOpt.IndexFile)
+		mdi.Clean(cleanWorkDir, cleanIndexFile)
 	},
 }
 
+var (
+	cleanWorkDir   string
+	cleanIndexFile string
+)
+
 func init() {
-	cleanCmd.Flags().StringVarP(&indexOpt.WorkDir, "workdir", "d", ".", "Specify the directory to clean markdown index.")
-	cleanCmd.Flags().StringVarP(&indexOpt.IndexFile, "index-file", "f", "./zz_generated_mdi.md", "Specify the markdown index file, default is `zz_generated_mdi.md`.")
+	cleanCmd.Flags().StringVarP(&cleanWorkDir, "workdir", "d", ".", "Specify the directory to clean markdown index.")
+	cleanCmd.Flags().StringVarP(&cleanWorkDir, "index-file", "f", "zz_generated_mdi.md", "Specify the markdown root index file, default is `zz_generated_mdi.md`.")
 
 	rootCmd.AddCommand(cleanCmd)
 }

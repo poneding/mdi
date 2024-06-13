@@ -19,10 +19,12 @@ mdi gen
 ```
 
 - `-d` 或 `--workdir`：指定要生成 Markdown 索引的目录
-- `-f` 或 `--index-file`：指定输出 Markdown 索引文件，默认为 `zz_gneratered_mdi.md`
 - `-t` 或 `--index-title`：指定 Markdown 索引标题，默认为 Markdown 索引文件的一级标题或当前目录名
+- `-f` 或 `--root-index-file`：指定输出 Markdown 根索引文件，默认为 `zz_gneratered_mdi.md`
+- `--sub-index-file`：指定输出 Markdown 子索引文件，默认为 `zz_gneratered_mdi.md`
 - `--inherit-gitignore`：使用 `.gitignore` 文件作为排除文件，默认为 `true`
 - `--override`：覆盖现有的 Markdown 索引文件，默认为 `false`
+- `--no-header-link`：在索引文件中不生成标题链接，默认为 `false`
 - `-r` 或 `--recursive`：递归在子目录中生成 Markdown 索引，默认为 `false`
 - `--nav`：在 Markdown 文件中生成导航，默认为 `false`
 - `-v` 或 `--verbose`：显示详细日志，默认为 `false`

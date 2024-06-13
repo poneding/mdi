@@ -26,28 +26,30 @@ import (
 	"strings"
 
 	"github.com/go-git/go-git/v5/plumbing/format/gitignore"
+	"github.com/poneding/mdi/pkg/util"
 )
 
 var defaultIndexFile = "zz_generated_mdi.md"
 var mdExts = []string{".md"}
 
 var defaultIndexOption = &IndexOption{
-	WorkDir:    ".",
-	IndexTitle: "Index",
-	IndexFile:  defaultIndexFile,
+	WorkDir:       ".",
+	IndexTitle:    "Index",
+	RootIndexFile: "README.md",
+	SubIndexFile:  defaultIndexFile,
 }
 
-var defaultGenerationOption = &GenerationOption{
-	Override:  false,
-	Recursive: true,
-	Nav:       false,
-}
+// var defaultGenerationOption = &GenerationOption{
+// 	Override:  false,
+// 	Recursive: true,
+// 	Nav:       false,
+// }
 
 type index struct {
-	workDir  string
-	file     string
-	title    string
-	content  string
+	workDir string
+	file    string
+	title   string
+	// content  string
 	chains   []*index
 	children []*index
 	entries  []*entry
@@ -56,7 +58,8 @@ type index struct {
 type IndexOption struct {
 	WorkDir          string
 	IndexTitle       string
-	IndexFile        string
+	RootIndexFile    string
+	SubIndexFile     string
 	InheritGitIgnore bool
 	chains           []*index
 	rootExcludes     *[]string
@@ -64,10 +67,11 @@ type IndexOption struct {
 }
 
 type GenerationOption struct {
-	Override  bool
-	Recursive bool
-	Nav       bool
-	Verbose   bool
+	Override     bool
+	Recursive    bool
+	Nav          bool
+	Verbose      bool
+	NoHeaderLink bool
 }
 
 type entry struct {
@@ -110,9 +114,9 @@ func NewIndex(idxOpt *IndexOption) *index {
 	}
 
 	// validate opt
-	if idxOpt == nil {
-		idxOpt = defaultIndexOption
-	}
+	// if idxOpt == nil {
+	// 	idxOpt = defaultIndexOption
+	// }
 
 	if idxOpt.WorkDir == "" {
 		idxOpt.WorkDir = defaultIndexOption.WorkDir
@@ -123,13 +127,14 @@ func NewIndex(idxOpt *IndexOption) *index {
 	if idxOpt.IndexTitle == "" {
 		idxOpt.IndexTitle = defaultIndexOption.IndexTitle
 	}
-	if idxOpt.IndexFile == "" {
-		idxOpt.IndexFile = path.Join(idxOpt.WorkDir, defaultIndexFile)
-	}
+
+	// if idxOpt.SubIndexFile == "" {
+	// 	idxOpt.SubIndexFile = path.Join(idxOpt.WorkDir, defaultIndexFile)
+	// }
 
 	idx := &index{
 		workDir:  idxOpt.WorkDir,
-		file:     idxOpt.IndexFile,
+		file:     util.If(len(idxOpt.RootIndexFile) > 0, idxOpt.RootIndexFile, idxOpt.SubIndexFile),
 		title:    idxOpt.IndexTitle,
 		children: make([]*index, 0),
 		entries:  make([]*entry, 0),
@@ -144,11 +149,12 @@ func NewIndex(idxOpt *IndexOption) *index {
 		}
 
 		if f.IsDir() {
-			if hasMdFile(subFile) {
+			if hasMdFile(subFile, idxOpt.SubIndexFile) {
+				indexFile := path.Join(subFile, path.Base(idxOpt.SubIndexFile))
 				subIndexOpt := &IndexOption{
 					WorkDir:      subFile,
-					IndexTitle:   readTitle(path.Join(subFile, defaultIndexFile)),
-					IndexFile:    path.Join(subFile, defaultIndexFile),
+					IndexTitle:   readTitle(indexFile),
+					SubIndexFile: indexFile,
 					rootExcludes: idxOpt.rootExcludes,
 					subExcludes:  getSubExcludes(subFile),
 					chains:       append(idxOpt.chains, idx), // append chains in sub index option
@@ -190,7 +196,11 @@ func (idx *index) Generate(genOpt *GenerationOption) {
 			subIdx.Generate(genOpt)
 		}
 	}
-	content := parseContent(idx, idx.workDir, "", 0)
+	content := parseContent(idx, &parseContentOption{
+		WorkDir:      idx.workDir,
+		Content:      "",
+		NoHeaderLink: genOpt.NoHeaderLink,
+	})
 
 	if genOpt.Override {
 		err := os.WriteFile(idx.file, []byte(fmt.Sprintf("%s# %s\n%s", idx.getIndexNav(), idx.title, content)), 0644)
@@ -300,32 +310,48 @@ func (e *entry) getBottomNav() string {
 	return result
 }
 
-func parseContent(idx *index, workdir, content string, depth int) string {
+type parseContentOption struct {
+	WorkDir      string
+	Content      string
+	Depth        int
+	NoHeaderLink bool
+}
+
+func parseContent(idx *index, opt *parseContentOption) string {
 	for _, subIdx := range idx.children {
-		relPath, _ := filepath.Rel(workdir, subIdx.file)
-		if depth == 0 {
-			content += fmt.Sprintf("\n## [%s](%s)\n", subIdx.title, getLink(relPath))
+		relPath, _ := filepath.Rel(opt.WorkDir, subIdx.file)
+		if opt.Depth == 0 {
+			if opt.NoHeaderLink {
+				opt.Content += fmt.Sprintf("\n## %s\n", subIdx.title)
+			} else {
+				opt.Content += fmt.Sprintf("\n## [%s](%s)\n", subIdx.title, getLink(relPath))
+			}
 		} else {
-			content += fmt.Sprintf("\n%s- [%s](%s)", strings.Repeat("  ", depth-1), subIdx.title, getLink(relPath))
+			opt.Content += fmt.Sprintf("\n%s- [%s](%s)", strings.Repeat("  ", opt.Depth-1), subIdx.title, getLink(relPath))
 		}
 
-		content += parseContent(subIdx, workdir, "", depth+1)
+		opt.Content += parseContent(subIdx, &parseContentOption{
+			WorkDir:      opt.WorkDir,
+			Content:      "",
+			Depth:        opt.Depth + 1,
+			NoHeaderLink: opt.NoHeaderLink,
+		})
 	}
 
 	for _, entry := range idx.entries {
-		relPath, _ := filepath.Rel(workdir, entry.file)
-		if depth == 0 {
-			content += fmt.Sprintf("\n[%s](%s)\n", entry.title, getLink(relPath))
+		relPath, _ := filepath.Rel(opt.WorkDir, entry.file)
+		if opt.Depth == 0 {
+			opt.Content += fmt.Sprintf("\n[%s](%s)\n", entry.title, getLink(relPath))
 		} else {
-			content += fmt.Sprintf("\n%s- [%s](%s)", strings.Repeat("  ", depth-1), entry.title, getLink(relPath))
+			opt.Content += fmt.Sprintf("\n%s- [%s](%s)", strings.Repeat("  ", opt.Depth-1), entry.title, getLink(relPath))
 		}
 	}
 
-	if !strings.HasSuffix(content, "\n") {
-		content += "\n"
+	if !strings.HasSuffix(opt.Content, "\n") {
+		opt.Content += "\n"
 	}
 
-	return content
+	return opt.Content
 }
 
 func getLink(file string) string {
@@ -334,7 +360,7 @@ func getLink(file string) string {
 
 var dirHasMdFileMap = make(map[string]bool)
 
-func hasMdFile(dir string) bool {
+func hasMdFile(dir, indexFile string) bool {
 	if v, ok := dirHasMdFileMap[dir]; ok {
 		return v
 	}
@@ -347,13 +373,13 @@ func hasMdFile(dir string) bool {
 			continue
 		}
 		if !de.IsDir() {
-			if slices.Contains(mdExts, path.Ext(de.Name())) && de.Name() != defaultIndexFile {
+			if slices.Contains(mdExts, path.Ext(de.Name())) && de.Name() != indexFile {
 				dirHasMdFileMap[path.Join(dir, de.Name())] = true
 				dirHasMdFileMap[dir] = true
 				return true
 			}
 		} else {
-			if hasMdFile(path.Join(dir, de.Name())) {
+			if hasMdFile(path.Join(dir, de.Name()), indexFile) {
 				dirHasMdFileMap[dir] = true
 				return true
 			}
@@ -428,7 +454,7 @@ func getIgnoreEntry(ignoreFile string) []string {
 	return result
 }
 
-func Clean(workDir, rootMDIFile string) {
+func Clean(workDir, indexFile string) {
 	if workDir == "" {
 		workDir = "."
 	}
@@ -439,9 +465,9 @@ func Clean(workDir, rootMDIFile string) {
 
 	for _, f := range files {
 		if f.IsDir() {
-			Clean(path.Join(workDir, f.Name()), defaultIndexFile)
+			Clean(path.Join(workDir, f.Name()), indexFile)
 		} else {
-			if f.Name() == rootMDIFile {
+			if f.Name() == indexFile {
 				os.Remove(path.Join(workDir, f.Name()))
 			}
 
@@ -477,6 +503,5 @@ func Clean(workDir, rootMDIFile string) {
 				}
 			}
 		}
-
 	}
 }

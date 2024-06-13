@@ -20,9 +20,11 @@ mdi gen
 
 - `-d` or `--workdir`: Specify the directory to generate markdown index.
 - `-t` or `--index-title`: Specify the title of markdown index, default is title of markdown index file or current directory name.
-- `-f` or `--index-file`: Specify the markdown index file, default is `zz_gneratered_mdi.md`.
+- `-f` or `--root-index-file`: Specify the markdown root index file, default is `zz_gneratered_mdi.md`.
+- `--sub-index-file`: Specify the markdown sub index file, default is `zz_gneratered_mdi.md`.
 - `--inherit-gitignore`: Use `.gitignore` file as ignore file, default is `true`.
 - `--override`: Override markdown existing index file, default is `false`.
+- `--no-header-link`: Do not generate header link in index file, default is `false`.
 - `-r` or `--recursive`: Recursively generate markdown index in subdirectories, default is `false`.
 - `--nav`: Generate navigation in markdown file, default is `false`.
 - `-v` or `--verbose`: Show verbose log, default is `false`.
