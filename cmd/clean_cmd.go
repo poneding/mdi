@@ -37,7 +37,7 @@ var (
 
 func init() {
 	cleanCmd.Flags().StringVarP(&cleanWorkDir, "workdir", "d", ".", "Specify the directory to clean markdown index.")
-	cleanCmd.Flags().StringVarP(&cleanWorkDir, "index-file", "f", "zz_generated_mdi.md", "Specify the markdown root index file, default is `zz_generated_mdi.md`.")
+	cleanCmd.Flags().StringVarP(&cleanIndexFile, "index-file", "f", "zz_generated_mdi.md", "Specify the markdown root index file, default is `zz_generated_mdi.md`.")
 
 	rootCmd.AddCommand(cleanCmd)
 }

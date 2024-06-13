@@ -20,6 +20,7 @@ mdi gen
 
 - `-d` or `--workdir`: Specify the directory to generate markdown index.
 - `-t` or `--index-title`: Specify the title of markdown index, default is title of markdown index file or current directory name.
+- `--home-title`: Specify the title of home link in markdown index, if not specified, use `index-title`.
 - `-f` or `--root-index-file`: Specify the markdown root index file, default is `zz_gneratered_mdi.md`.
 - `--sub-index-file`: Specify the markdown sub index file, default is `zz_gneratered_mdi.md`.
 - `--inherit-gitignore`: Use `.gitignore` file as ignore file, default is `true`.

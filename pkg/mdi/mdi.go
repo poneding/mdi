@@ -46,9 +46,10 @@ var defaultIndexOption = &IndexOption{
 // }
 
 type index struct {
-	workDir string
-	file    string
-	title   string
+	workDir   string
+	file      string
+	title     string
+	homeTitle string
 	// content  string
 	chains   []*index
 	children []*index
@@ -58,6 +59,7 @@ type index struct {
 type IndexOption struct {
 	WorkDir          string
 	IndexTitle       string
+	HomeTitle        string
 	RootIndexFile    string
 	SubIndexFile     string
 	InheritGitIgnore bool
@@ -127,17 +129,21 @@ func NewIndex(idxOpt *IndexOption) *index {
 	if idxOpt.IndexTitle == "" {
 		idxOpt.IndexTitle = defaultIndexOption.IndexTitle
 	}
+	if idxOpt.HomeTitle == "" {
+		idxOpt.HomeTitle = idxOpt.IndexTitle
+	}
 
 	// if idxOpt.SubIndexFile == "" {
 	// 	idxOpt.SubIndexFile = path.Join(idxOpt.WorkDir, defaultIndexFile)
 	// }
 
 	idx := &index{
-		workDir:  idxOpt.WorkDir,
-		file:     util.If(len(idxOpt.RootIndexFile) > 0, idxOpt.RootIndexFile, idxOpt.SubIndexFile),
-		title:    idxOpt.IndexTitle,
-		children: make([]*index, 0),
-		entries:  make([]*entry, 0),
+		workDir:   idxOpt.WorkDir,
+		file:      util.If(len(idxOpt.RootIndexFile) > 0, idxOpt.RootIndexFile, idxOpt.SubIndexFile),
+		title:     idxOpt.IndexTitle,
+		homeTitle: idxOpt.HomeTitle,
+		children:  make([]*index, 0),
+		entries:   make([]*entry, 0),
 	}
 	// set self as chain tail
 	idx.chains = append(idxOpt.chains, idx)
@@ -154,6 +160,7 @@ func NewIndex(idxOpt *IndexOption) *index {
 				subIndexOpt := &IndexOption{
 					WorkDir:      subFile,
 					IndexTitle:   readTitle(indexFile),
+					HomeTitle:    idxOpt.HomeTitle,
 					SubIndexFile: indexFile,
 					rootExcludes: idxOpt.rootExcludes,
 					subExcludes:  getSubExcludes(subFile),
@@ -230,8 +237,9 @@ func (idx *index) getIndexNav() string {
 	var indexNav string
 	// index not included, so loop to len-1
 	for i := 0; i < len(idx.chains)-1; i++ {
+		title := util.If(i == 0, idx.homeTitle, idx.chains[i].title)
 		backpath := strings.Repeat("../", len(idx.chains)-i-1) + path.Base(idx.chains[i].file)
-		indexNav += fmt.Sprintf("[%s](%s) / ", idx.chains[i].title, getLink(backpath))
+		indexNav += fmt.Sprintf("[%s](%s) / ", title, getLink(backpath))
 	}
 	indexNav += idx.title + "\n\n"
 	return indexNav
@@ -240,8 +248,9 @@ func (idx *index) getIndexNav() string {
 func (idx *index) getEntryNavPrefix() string {
 	var navPrefix string
 	for i := 0; i < len(idx.chains); i++ {
+		title := util.If(i == 0, idx.homeTitle, idx.chains[i].title)
 		backpath := strings.Repeat("../", len(idx.chains)-i-1) + path.Base(idx.chains[i].file)
-		navPrefix += fmt.Sprintf("[%s](%s) / ", idx.chains[i].title, getLink(backpath))
+		navPrefix += fmt.Sprintf("[%s](%s) / ", title, getLink(backpath))
 	}
 	return navPrefix
 }

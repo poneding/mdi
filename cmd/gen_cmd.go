@@ -41,6 +41,7 @@ func run() {
 func init() {
 	genCmd.Flags().StringVarP(&indexOpt.WorkDir, "workdir", "d", ".", "Specify the directory to generate markdown index.")
 	genCmd.Flags().StringVarP(&indexOpt.IndexTitle, "index-title", "t", "", "Specify the title of markdown index, default is title of markdown index file or current directory name.")
+	genCmd.Flags().StringVar(&indexOpt.HomeTitle, "home-title", "", "Specify the title of home link in markdown index, if not specified, use `index-title`.")
 	genCmd.Flags().StringVarP(&indexOpt.RootIndexFile, "root-index-file", "f", "zz_generated_mdi.md", "Specify the markdown root index file, default is `zz_generated_mdi.md`.")
 	genCmd.Flags().StringVar(&indexOpt.SubIndexFile, "sub-index-file", "zz_generated_mdi.md", "Specify the markdown sub index file, default is `zz_generated_mdi.md`.")
 	genCmd.Flags().BoolVar(&indexOpt.InheritGitIgnore, "inherit-gitignore", true, "Use `.gitignore` file as ignore file, default is `true`.")
