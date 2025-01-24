@@ -281,7 +281,8 @@ func (idx *index) decorateEntry() {
 				if lines[len(lines)-3] == "---" {
 					lines = lines[:len(lines)-3]
 				}
-				if lines[len(lines)-5] == "---" {
+
+				if len(lines) > 4 && lines[len(lines)-5] == "---" {
 					lines = lines[:len(lines)-5]
 				}
 			}
